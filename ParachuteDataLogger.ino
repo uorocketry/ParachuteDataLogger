@@ -2,22 +2,24 @@
 #include <SPI.h>
 #include <SD.h>
 
-// HX711
+// HX711 Loadcell Amplifiers
 const int LOADCELL_1_DOUT = 5;
 const int LOADCELL_1_SCK = 6;
 const int LOADCELL_2_DOUT = 7;
 const int LOADCELL_2_SCK = 8;
-
-const int PROXIMITY_PIN = 2;
-const int BUTTON_PIN = 3;
-const int GREEN_PIN = 9;
-const int RED_PIN = 10;
-
 HX711 scale1;
 HX711 scale2;
 
-bool recording = false;
-bool startup = false;
+// Button and proximity sensor
+const int PROXIMITY_PIN = 2;
+const int BUTTON_PIN = 3;
+const float METERS_PER_TICK = 0.5;
+// Indicator LEDs
+const int GREEN_PIN = 9;
+const int RED_PIN = 10;
+
+bool recording = false; // Logging active
+bool startup = false;   // Starting/stopping logging
 
 void setup() {
   Serial.begin(115200);
@@ -50,13 +52,14 @@ void setup() {
   digitalWrite(RED_PIN, LOW);
 }
 
+unsigned long lastTickTime = 0;
 int tickCount = 0;
-unsigned long lastTime = 0;
-unsigned long interval = 1000;
+float velocities[100];
+
+unsigned long logStartTime;
 const int LINES_PER_WRITE = 10;
 float logData[LINES_PER_WRITE][4];
 int logCount = 0;
-unsigned long logStartTime;
 
 void loop() {
   if (scale1.is_ready() && scale2.is_ready() && recording) {
@@ -78,12 +81,6 @@ void loop() {
       sdWrite(logData, LINES_PER_WRITE);
       logCount = 0;
     }
-  }
-
-  if (lastTime + interval <= millis()) {
-    lastTime = lastTime + interval;
-    //Serial.println(tickCount, 1);
-    tickCount = 0;
   }
 
   if (startup) {
@@ -113,7 +110,12 @@ void loop() {
 }
 
 void tick() {
-  tickCount++;
+  if (tickCount < 100) {
+    // Tick count should always be less that 100 
+    unsigned long thisTickTime = millis();
+    float velocity = (1000 * METERS_PER_TICK)/(thisTickTime - lastTickTime);
+    lastTickTime = thisTickTime;
+  }
 }
 
 void buttonDown() {
