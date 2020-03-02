@@ -1,3 +1,6 @@
+#include <SPI.h>
+#include <SD.h>
+
 const int CHIP_SELECT = 4;
 
 void initSd() {
