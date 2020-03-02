@@ -1,18 +1,19 @@
 #define MEASURE_TIME 1000 // Time over which ticks are logged in ms, ticks older than this number will be discarded
 #define MEASURE_TIMES_LENGTH 80
+#define METERS_PER_TICK 0.239889369
 
 int tickCount = 0; // Number of ticks in a time interval no longer than MEASURE_TIME
 unsigned long measureTimes[MEASURE_TIMES_LENGTH]; // Stores times at which ticks occurred
-int head = 0;
+int head = MEASURE_TIMES_LENGTH;
 int tail = 0;
 
 void enqueueTime(float tickTime) {
-  measureTimes[head] = tickTime;
   head = (head + 1) % MEASURE_TIMES_LENGTH;
+  measureTimes[head] = tickTime;
 }
 
 void dequeueTime() {
-  tail = (tail - 1) % MEASURE_TIMES_LENGTH;
+  tail = (tail + 1) % MEASURE_TIMES_LENGTH;
 }
 
 void speedometerTick() {
@@ -21,23 +22,33 @@ void speedometerTick() {
     unsigned long timeNow = millis();
     enqueueTime(timeNow); // Add a tick
     // Remove ticks older than MEASURE_TIME
-    while (measureTimes[tail] > timeNow + MEASURE_TIME) {
-      dequeueTime();
-      tickCount--;
-    }
-    // Remove ticks older than MEASURE_TIME
-    while (tickCount > 0 && measureTimes[tail] > timeNow + MEASURE_TIME) {
-      dequeueTime();
-      tickCount--;
-    }
+    removeOldTicks(timeNow);
   } else {
     Serial.println("Tick time array is full!");
     stopForError();
+  }  
+  /*
+  Serial.print(tickCount);
+  Serial.print(", ");
+  Serial.print(head);
+  Serial.print(", ");
+  Serial.print(tail);
+  Serial.print(", ");
+  Serial.println(getTicksPerSecond(), 2);
+  */
+}
+
+void removeOldTicks(unsigned long timeNow) {
+  // Remove ticks older than MEASURE_TIME
+  while (tickCount > 0 && measureTimes[tail] + MEASURE_TIME < timeNow) {
+    dequeueTime();
+    tickCount--;
   }
 }
 
 float getTicksPerSecond() {
-  if (head >= tail) {
+  removeOldTicks(millis());
+  if (tickCount > 0) {
     // Number of ticks in the specified capture time
     return (1000.0 * tickCount)/(measureTimes[head] - measureTimes[tail]);
   } else {
@@ -45,6 +56,6 @@ float getTicksPerSecond() {
   }
 }
 
-void getVelocity() {
-  
+float getVelocity() {
+  return METERS_PER_TICK * getTicksPerSecond();
 }

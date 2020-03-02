@@ -1,7 +1,7 @@
 #include <SPI.h>
 #include <SD.h>
 
-const int CHIP_SELECT = 4;
+#define CHIP_SELECT 4
 
 void initSd() {
   if (!SD.begin(CHIP_SELECT)) {
@@ -36,7 +36,7 @@ void sdWrite(float data[][4], int len) {
     for (int i = 0; i < len; i++) {
       logFile.print(data[i][0], 3);
       logFile.print(", ");
-      logFile.print(data[i][1], 1);
+      logFile.print(data[i][1], 2);
       logFile.print(", ");
       logFile.print(data[i][2], 1);
       logFile.print(", ");
@@ -46,15 +46,5 @@ void sdWrite(float data[][4], int len) {
   } else {
     Serial.println("Error opening file");
     stopForError();
-  }
-}
-
-void stopForError() {
-  digitalWrite(GREEN_PIN, LOW);
-  while(1) {
-    digitalWrite(RED_PIN, LOW);
-    delay(500);
-    digitalWrite(RED_PIN, HIGH);
-    delay(500);
   }
 }

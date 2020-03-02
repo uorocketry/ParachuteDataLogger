@@ -1,11 +1,10 @@
 // Button and proximity sensor
-const int PROXIMITY_PIN = 2;
-const int BUTTON_PIN = 3;
-const float METERS_PER_TICK = 0.5;
+#define PROXIMITY_PIN 2
+#define BUTTON_PIN 3
 
 // Indicator LEDs
-const int GREEN_PIN = 9;
-const int RED_PIN = 10;
+#define GREEN_PIN 9
+#define RED_PIN 10
 
 bool recording = false; // Logging active
 bool startup = false;   // Starting/stopping logging
@@ -41,13 +40,13 @@ int logCount = 0;
 void loop() {
   if (scalesReady() && recording) {
     logData[logCount][0] = (millis() - logStartTime)/1000.0;
-    logData[logCount][1] = 0.0;
+    logData[logCount][1] = getVelocity();
     logData[logCount][2] = getScale1();
     logData[logCount][3] = getScale2();
     
     Serial.print(logData[logCount][0], 3);
     Serial.print(", ");
-    Serial.print(logData[logCount][1], 1);
+    Serial.print(logData[logCount][1], 2);
     Serial.print(", ");
     Serial.print(logData[logCount][2], 1);
     Serial.print(", ");
@@ -89,5 +88,15 @@ void tick() {
 void buttonDown() {
   if (!startup) {
     startup = true;
+  }
+}
+
+void stopForError() {
+  digitalWrite(GREEN_PIN, LOW);
+  while(1) {
+    digitalWrite(RED_PIN, LOW);
+    delay(500);
+    digitalWrite(RED_PIN, HIGH);
+    delay(500);
   }
 }
