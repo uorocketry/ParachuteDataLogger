@@ -1,5 +1,5 @@
-#define MEASURE_TIME 1000 // Time over which ticks are logged in ms, ticks older than this number will be discarded
-#define MEASURE_TIMES_LENGTH 80
+#define MEASURE_TIME 500 // Time over which ticks are logged in ms, ticks older than this number will be discarded
+#define MEASURE_TIMES_LENGTH 50
 #define METERS_PER_TICK 0.239889369
 
 int tickCount = 0; // Number of ticks in a time interval no longer than MEASURE_TIME
