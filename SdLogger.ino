@@ -27,7 +27,7 @@ void newFile() {
 }
 
 String getFileName(int i){
-  return "LOG_" + String(fileCount) + ".TXT";
+  return "LOG_" + String(fileCount) + ".CSV";
 }
 
 void sdWrite(float data[][4], int len) {

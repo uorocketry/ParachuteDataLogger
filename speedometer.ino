@@ -1,6 +1,8 @@
+#include <Servo.h>
+
 #define MEASURE_TIME 500 // Time over which ticks are logged in ms, ticks older than this number will be discarded
 #define MEASURE_TIMES_LENGTH 50
-#define METERS_PER_TICK 0.239889369
+#define METERS_PER_TICK 0.21844 // 2.1844 m/rev, 10 ticks/rev
 
 int tickCount = 0; // Number of ticks in a time interval no longer than MEASURE_TIME
 unsigned long measureTimes[MEASURE_TIMES_LENGTH]; // Stores times at which ticks occurred

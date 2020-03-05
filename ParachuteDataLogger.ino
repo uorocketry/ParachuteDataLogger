@@ -1,27 +1,29 @@
+#include <Servo.h> // For speedometer display
+
 // Button and proximity sensor
 #define PROXIMITY_PIN 2
 #define BUTTON_PIN 3
 
-// Indicator LEDs
-#define GREEN_PIN 9
-#define RED_PIN 10
+// Indicators
+#define SERVO_PIN 9
+#define LED_PIN 10
 
 bool recording = false; // Logging active
 bool startup = false;   // Starting/stopping logging
+Servo speedGauge;
 
 void setup() {
   Serial.begin(115200);
-  
-  pinMode(RED_PIN, OUTPUT);
-  digitalWrite(RED_PIN, HIGH);
-  pinMode(GREEN_PIN, OUTPUT);
-  digitalWrite(GREEN_PIN, LOW);
+
+  pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, HIGH);
   
   pinMode(PROXIMITY_PIN, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(PROXIMITY_PIN), tick, FALLING);
   pinMode(BUTTON_PIN, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(BUTTON_PIN), buttonDown, FALLING);
-
+  speedGauge.attach(9);
+  
   delay(1000);
   initSd();
   startup = false;
@@ -29,18 +31,25 @@ void setup() {
   initScales();
   
   Serial.println("Initialization complete");
-  digitalWrite(RED_PIN, LOW);
+  digitalWrite(LED_PIN, LOW);
 }
 
 unsigned long logStartTime;
 const int LINES_PER_WRITE = 10;
 float logData[LINES_PER_WRITE][4];
 int logCount = 0;
+bool ledToggle = true;
 
 void loop() {
+  float velocity = getVelocity();
+  speedGauge.write(constrain(velocity * 15, 0, 180));
+  
   if (scalesReady() && recording) {
+    digitalWrite(LED_PIN, ledToggle ? LOW : HIGH);
+    ledToggle = !ledToggle;
+    
     logData[logCount][0] = (millis() - logStartTime)/1000.0;
-    logData[logCount][1] = getVelocity();
+    logData[logCount][1] = velocity;
     logData[logCount][2] = getScale1();
     logData[logCount][3] = getScale2();
     
@@ -58,22 +67,20 @@ void loop() {
       logCount = 0;
     }
   }
-
+  
   if (startup) {
-    digitalWrite(RED_PIN, HIGH);
+    digitalWrite(LED_PIN, HIGH);
     if (recording){
       // Stop recording
       sdWrite(logData, logCount);
       delay(1000);
-      digitalWrite(GREEN_PIN, LOW);
-      digitalWrite(RED_PIN, LOW);
+      digitalWrite(LED_PIN, LOW);
     } else {
       // Start recording
       newFile();
       delay(1000);
       logStartTime = millis();
-      digitalWrite(RED_PIN, LOW);
-      digitalWrite(GREEN_PIN, HIGH);
+      digitalWrite(LED_PIN, LOW);
     }
     recording = !recording;
     setScalePower(recording);
@@ -92,11 +99,10 @@ void buttonDown() {
 }
 
 void stopForError() {
-  digitalWrite(GREEN_PIN, LOW);
   while(1) {
-    digitalWrite(RED_PIN, LOW);
+    digitalWrite(LED_PIN, LOW);
     delay(500);
-    digitalWrite(RED_PIN, HIGH);
+    digitalWrite(LED_PIN, HIGH);
     delay(500);
   }
 }
