@@ -40,16 +40,32 @@ float logData[LINES_PER_WRITE][4];
 int logCount = 0;
 bool ledToggle = true;
 
+#define NUM_VELOCITIES 10
+float velocities[NUM_VELOCITIES]; 
+int velocityIdx = 0;
+float velocity;
+float totalVel;
+float averageVel;
+
 void loop() {
-  float velocity = getVelocity();
-  speedGauge.write(constrain(velocity * 15, 0, 180));
+  velocity  = getVelocity();
+
+  // Moving average of velocites for speedometer display
+  totalVel -= velocities[velocityIdx];
+  velocities[velocityIdx] = velocity;
+  totalVel += velocities[velocityIdx++];
+  if (velocityIdx >= NUM_VELOCITIES) {
+    velocityIdx = 0;
+  }
+  averageVel = totalVel / NUM_VELOCITIES;
+  speedGauge.write(constrain(averageVel*15 - 10, 10, 180));
   
   if (scalesReady() && recording) {
     digitalWrite(LED_PIN, ledToggle ? LOW : HIGH);
     ledToggle = !ledToggle;
     
     logData[logCount][0] = (millis() - logStartTime)/1000.0;
-    logData[logCount][1] = velocity;
+    logData[logCount][1] = averageVel;
     logData[logCount][2] = getScale1();
     logData[logCount][3] = getScale2();
     
