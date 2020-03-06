@@ -3,8 +3,8 @@
 // HX711 Loadcell Amplifiers
 #define LOADCELL_1_DOUT 5
 #define LOADCELL_1_SCK 6
-#define LOADCELL_2_DOUT 7
-#define LOADCELL_2_SCK 8
+#define LOADCELL_2_DOUT 8
+#define LOADCELL_2_SCK 7
 HX711 scale1;
 HX711 scale2;
 

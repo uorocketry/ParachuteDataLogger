@@ -5,8 +5,8 @@
 #define BUTTON_PIN 3
 
 // Indicators
-#define SERVO_PIN 9
-#define LED_PIN 10
+#define SERVO_PIN 10
+#define LED_PIN 9
 
 bool recording = false; // Logging active
 bool startup = false;   // Starting/stopping logging
@@ -22,9 +22,9 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(PROXIMITY_PIN), tick, FALLING);
   pinMode(BUTTON_PIN, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(BUTTON_PIN), buttonDown, FALLING);
-  speedGauge.attach(9);
+  speedGauge.attach(SERVO_PIN);
   
-  delay(1000);
+  delay(500);
   initSd();
   startup = false;
   
@@ -45,7 +45,6 @@ float velocities[NUM_VELOCITIES];
 int velocityIdx = 0;
 float velocity;
 float totalVel;
-float averageVel;
 
 void loop() {
   velocity  = getVelocity();
@@ -57,15 +56,14 @@ void loop() {
   if (velocityIdx >= NUM_VELOCITIES) {
     velocityIdx = 0;
   }
-  averageVel = totalVel / NUM_VELOCITIES;
-  speedGauge.write(constrain(averageVel*15 - 10, 10, 180));
+  speedGauge.write(constrain((totalVel/NUM_VELOCITIES)*15 + 10, 10, 180));
   
   if (scalesReady() && recording) {
     digitalWrite(LED_PIN, ledToggle ? LOW : HIGH);
     ledToggle = !ledToggle;
     
     logData[logCount][0] = (millis() - logStartTime)/1000.0;
-    logData[logCount][1] = averageVel;
+    logData[logCount][1] = velocity;
     logData[logCount][2] = getScale1();
     logData[logCount][3] = getScale2();
     
@@ -89,12 +87,12 @@ void loop() {
     if (recording){
       // Stop recording
       sdWrite(logData, logCount);
-      delay(1000);
+      delay(500);
       digitalWrite(LED_PIN, LOW);
     } else {
       // Start recording
       newFile();
-      delay(1000);
+      delay(500);
       logStartTime = millis();
       digitalWrite(LED_PIN, LOW);
     }
