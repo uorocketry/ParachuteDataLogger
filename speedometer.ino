@@ -33,8 +33,12 @@ void speedometerTick() {
   Serial.print(tickCount);
   Serial.print(", ");
   Serial.print(head);
+  Serial.print(":");
+  Serial.print(measureTimes[head]);
   Serial.print(", ");
   Serial.print(tail);
+  Serial.print(":");
+  Serial.print(measureTimes[tail]);
   Serial.print(", ");
   Serial.println(getTicksPerSecond(), 2);
   */
@@ -49,7 +53,7 @@ void removeOldTicks(unsigned long timeNow) {
 }
 
 float getTicksPerSecond() {
-  removeOldTicks(millis());
+  //removeOldTicks(millis()); -> Never put this here again
   if (tickCount > 0) {
     // Number of ticks in the specified capture time
     return (1000.0 * tickCount)/(measureTimes[head] - measureTimes[tail]);
