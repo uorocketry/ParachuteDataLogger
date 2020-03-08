@@ -71,9 +71,9 @@ void loop() {
     Serial.print(", ");
     Serial.print(logData[logCount][1], 2);
     Serial.print(", ");
-    Serial.print(logData[logCount][2], 1);
+    Serial.print(logData[logCount][2], 2);
     Serial.print(", ");
-    Serial.println(logData[logCount][3], 1);
+    Serial.println(logData[logCount][3], 2);
     
     logCount++;
     if (logCount >= LINES_PER_WRITE) {

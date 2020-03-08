@@ -38,9 +38,9 @@ void sdWrite(float data[][4], int len) {
       logFile.print(", ");
       logFile.print(data[i][1], 2);
       logFile.print(", ");
-      logFile.print(data[i][2], 1);
+      logFile.print(data[i][2], 2);
       logFile.print(", ");
-      logFile.println(data[i][3], 1);
+      logFile.println(data[i][3], 2);
     }
     logFile.close();
   } else {
