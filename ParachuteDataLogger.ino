@@ -56,7 +56,8 @@ void loop() {
   if (velocityIdx >= NUM_VELOCITIES) {
     velocityIdx = 0;
   }
-  speedGauge.write(constrain((totalVel/NUM_VELOCITIES)*15 + 10, 10, 180));
+  float velKm = (totalVel/NUM_VELOCITIES)*3.6;
+  speedGauge.write(constrain((velKm-10)*3.6, 0, 180));
   
   if (scalesReady() && recording) {
     digitalWrite(LED_PIN, ledToggle ? LOW : HIGH);
